@@ -39,3 +39,12 @@ GPIO.setup(reset,GPIO.IN, pull_up_down = GPIO.PUD_UP)
 GPIO.setup(frequency,GPIO.IN, pull_up_down = GPIO.PUD_UP)
 GPIO.setup(stop,GPIO.IN, pull_up_down = GPIO.PUD_UP)
 GPIO.setup(display,GPIO.IN, pull_up_down = GPIO.PUD_UP)
+
+def timerFormat(t):
+    t = t*10
+    milli = t % 10
+    t //= 10
+    sec = t % 60
+    t //= 60
+    mins = t
+    return '%02d:%02d.%d0' % (mins, sec, milli)
