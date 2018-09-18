@@ -1,4 +1,7 @@
-#Prac4 Main python file
+# # Simple example of reading the MCP3008 analog input channels and printing
+# # them all out.
+# # License: Public Domain
+
 import RPi.GPIO as GPIO
 import Adafruit_MCP3008
 import time
@@ -9,16 +12,17 @@ Time = [0,0,0,0,0]
 Timer = [0,0,0,0,0]
 ch0 = [0,0,0,0,0]
 ch1 = [0,0,0,0,0]
-ch2 = [0,0,0,0,0]                             
+ch2 = [0,0,0,0,0]
 
-count = 0			      #Determines T value determined by frequency button
-T = 0.5                               #This value is frequency
-i = 0				      #Linked to frequency
+count = 0											        #Determines T value determined by frequency button
+T = 0.5                                									#This value is frequency
+i = 0													#Linked to frequency
 
 index = 0
 
 stopState = 0
-wall = time.time()  
+wall = time.time()
+    
 
 # Software SPI configuration:
 CLK  = 18
@@ -39,16 +43,8 @@ GPIO.setup(frequency,GPIO.IN, pull_up_down = GPIO.PUD_UP)
 GPIO.setup(stop,GPIO.IN, pull_up_down = GPIO.PUD_UP)
 GPIO.setup(display,GPIO.IN, pull_up_down = GPIO.PUD_UP)
 
-def timerFormat(t):                             #Displays time in MM:SS:mm
-    t = t*10
-    milli = t % 10
-    t //= 10
-    sec = t % 60
-    t //= 60
-    mins = t
-    return '%02d:%02d.%d0' % (mins, sec, milli)
-
 ########## Callback Fns #############################################
+
 def stopOP(channel):
     global stopState
     if(stopState == 1):
@@ -70,13 +66,26 @@ def displayOP(channel):
     print("Button pressed: ", index, "Frequency: ", T)
     displayFn()
 ######################################################################
+
 #Interrupts
 GPIO.add_event_detect(reset, GPIO.FALLING, callback = resetOP, bouncetime = 500)
 GPIO.add_event_detect(frequency, GPIO.FALLING, callback = frequencyOP, bouncetime = 500)
 GPIO.add_event_detect(stop, GPIO.FALLING, callback = stopOP, bouncetime = 200)
-GPIO.add_event_detect(display, GPIO.FALLING, callback = displayOP, bouncetime = 4000)       
+GPIO.add_event_detect(display, GPIO.FALLING, callback = displayOP, bouncetime = 4000)
 
-########## The functions of the buttons are defined below ############
+def timerFormat(t):
+    t = t*10
+    milli = t % 10
+    t //= 10
+    sec = t % 60
+    t //= 60
+    mins = t
+    return '%02d:%02d.%d0' % (mins, sec, milli)
+	
+
+	
+########## The functions of the buttons are defined below ##########
+
 def Tvalue():
     global T, count
     if (count == 0):
@@ -88,12 +97,27 @@ def Tvalue():
     count += 1
     if (count > 2):
         count = 0
+
     return count
 
 def stopFn():
-    pass						
+    '''
+    ch0[4] = "N/A"
+    ch1[4] = "N/A"
+    ch2[4] = "N/A"
+    '''
+    pass
+##    ch0.insert(5,"N/A")
+##    ch0.pop(0)
+##    ch1.insert(5,"N/A")
+##    ch1.pop(0)
+##    ch2.insert(5,"N/A")
+##    ch2.pop(0)						
 
 def displayFn():
+##    global timeL
+##    length = len(timeL)
+##    print(length)
     title = ["Time","Timer","Pot","Temp","Light"]
     print('| {0:>8} | {1:>8} | {2:>4} | {3:>4} | {4:>4} |'.format(*title))
     print('-' * 38)
@@ -112,4 +136,126 @@ def resetFn():
     #print("\n"*100)
     os.system('clear')
     return i
+
 ####### END OF BUTTON FUNTIONS ###########
+
+####### CONVERSION FUNCTIONS #############
+def continuous(Time, Timer, ch0, ch1, ch2):
+    print('-' * 38)
+    print(" ", Time[4], " ", Timer[4], "  ", ConvertVolts(ch0[4]), "  ", ConvertTemp(ch1[4]), "  ", ConvertPercentage(ch2[4]), "")
+    
+def ConvertVolts(data):
+
+    if type(data) is str:
+        return "N/A"
+    
+    volts = (data * 3.3) / float(1023)
+    volts = round(volts,1)
+    return str(volts) + " V"
+
+def ConvertPercentage(data):
+
+    if type(data) is str:
+        return "N/A"
+    
+    percent = 100 - (data/570)*100
+    percent = round(percent, 0)
+    return str(percent) + " %"
+
+#-40 : 0 and 150: 1023
+def ConvertTemp(data):
+    if type(data) is str:
+        return "N/A"
+
+    temp = (data/290) + 40 
+    temp = round(temp, 1)
+    return str(temp) + " C"
+
+title = ["Time","Timer","Pot","Temp","Light"]
+print('| {0:>8} | {1:>8} | {2:>4} | {3:>4} | {4:>4} |'.format(*title))
+
+while True:
+    timerVal = time.time() - wall
+    start = time.time()
+    if (timerVal >= i):
+
+        ####### TIME #######
+        timeL = time.strftime("%H:%M:%S", time.localtime())
+        Time.insert(5,timeL)
+        Time.pop(0)
+        ####### END TIME ###
+
+        while(time.time() < start + T):
+            time.sleep(0.1)
+        ####### TIMER ######
+        Timer.insert(5,timerFormat(i))
+        Timer.pop(0)
+        ####### END TIMER ##
+		
+	####### Channel 0 ##
+        ch0.insert(5,mcp.read_adc(0))
+        ch0.pop(0)
+	####### END Ch 0 ###
+	
+	####### Channel 1 ##
+        ch1.insert(5,mcp.read_adc(1))
+        ch1.pop(0)
+	####### END Ch 1 ###
+	
+	####### Channel 2 ##
+        ch2.insert(5,mcp.read_adc(7))								#This reads from channel 7
+        ch2.pop(0)
+	####### END Ch 2 ###
+        
+        if (stopState == 1):
+            stopFn()      
+        
+        i += T
+        #print(str(i))
+        if stopState == 0:
+            continuous(Time, Timer, ch0, ch1, ch2)
+        else:
+            pass
+        #print(Time, Timer, ch0, ch1, ch2, sep="     ") #Works brilliantly
+
+	
+	
+
+	
+	
+GPIO.cleanup()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
