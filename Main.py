@@ -71,9 +71,60 @@ def displayOP(channel):
     print("Button pressed: ", index, "Frequency: ", T)
     displayFn()
 ######################################################################
-
 #Interrupts
 GPIO.add_event_detect(reset, GPIO.FALLING, callback = resetOP, bouncetime = 500)
 GPIO.add_event_detect(frequency, GPIO.FALLING, callback = frequencyOP, bouncetime = 500)
 GPIO.add_event_detect(stop, GPIO.FALLING, callback = stopOP, bouncetime = 200)
 GPIO.add_event_detect(display, GPIO.FALLING, callback = displayOP, bouncetime = 4000)       
+
+########## The functions of the buttons are defined below ############
+def Tvalue():
+    global T, count
+    if (count == 0):
+        T = 0.5
+    elif (count == 1):
+        T = 1
+    else:
+        T = 2
+    count += 1
+    if (count > 2):
+        count = 0
+    return count
+
+def stopFn():
+    '''
+    ch0[4] = "N/A"
+    ch1[4] = "N/A"
+    ch2[4] = "N/A"
+    '''
+    pass
+##    ch0.insert(5,"N/A")
+##    ch0.pop(0)
+##    ch1.insert(5,"N/A")
+##    ch1.pop(0)
+##    ch2.insert(5,"N/A")
+##    ch2.pop(0)						
+
+def displayFn():
+##    global timeL
+##    length = len(timeL)
+##    print(length)
+    title = ["Time","Timer","Pot","Temp","Light"]
+    print('| {0:>8} | {1:>8} | {2:>4} | {3:>4} | {4:>4} |'.format(*title))
+    print('-' * 38)
+    print(" ", Time[0], " ", Timer[0], "  ", ConvertVolts(ch0[0]), "  ", ConvertTemp(ch1[0]), "  ", ConvertPercentage(ch2[0]), "")
+    print(" ", Time[1], " ", Timer[1], "  ", ConvertVolts(ch0[1]), "  ", ConvertTemp(ch1[1]), "  ", ConvertPercentage(ch2[1]), "")
+    print(" ", Time[2], " ", Timer[2], "  ", ConvertVolts(ch0[2]), "  ", ConvertTemp(ch1[2]), "  ", ConvertPercentage(ch2[2]), "")
+    print(" ", Time[3], " ", Timer[3], "  ", ConvertVolts(ch0[3]), "  ", ConvertTemp(ch1[3]), "  ", ConvertPercentage(ch2[3]), "")
+    print(" ", Time[4], " ", Timer[4], "  ", ConvertVolts(ch0[4]), "  ", ConvertTemp(ch1[4]), "  ", ConvertPercentage(ch2[4]), "")
+
+def resetFn():
+    global i, wall, timerVal, Timer
+    Timer = [0,0,0,0,0]
+    wall = time.time()
+    timerVal = wall
+    i = 0
+    #print("\n"*100)
+    os.system('clear')
+    return i
+####### END OF BUTTON FUNTIONS ###########
