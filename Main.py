@@ -11,9 +11,9 @@ ch0 = [0,0,0,0,0]
 ch1 = [0,0,0,0,0]
 ch2 = [0,0,0,0,0]                             
 
-count = 0				              #Determines T value determined by frequency button
+count = 0			      #Determines T value determined by frequency button
 T = 0.5                               #This value is frequency
-i = 0						          #Linked to frequency
+i = 0				      #Linked to frequency
 
 index = 0
 
@@ -49,7 +49,6 @@ def timerFormat(t):                             #Displays time in MM:SS:mm
     return '%02d:%02d.%d0' % (mins, sec, milli)
 
 ########## Callback Fns #############################################
-
 def stopOP(channel):
     global stopState
     if(stopState == 1):
@@ -92,23 +91,9 @@ def Tvalue():
     return count
 
 def stopFn():
-    '''
-    ch0[4] = "N/A"
-    ch1[4] = "N/A"
-    ch2[4] = "N/A"
-    '''
-    pass
-##    ch0.insert(5,"N/A")
-##    ch0.pop(0)
-##    ch1.insert(5,"N/A")
-##    ch1.pop(0)
-##    ch2.insert(5,"N/A")
-##    ch2.pop(0)						
+    pass						
 
 def displayFn():
-##    global timeL
-##    length = len(timeL)
-##    print(length)
     title = ["Time","Timer","Pot","Temp","Light"]
     print('| {0:>8} | {1:>8} | {2:>4} | {3:>4} | {4:>4} |'.format(*title))
     print('-' * 38)
